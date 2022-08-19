@@ -1,7 +1,7 @@
 package io.github.kientux;
 
-import io.github.kientux.parser.OpenGrapeParser;
 import io.github.kientux.parser.DefaultOpenGrapeParser;
+import io.github.kientux.parser.OpenGrapeParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +21,9 @@ public class OpenGrape {
     }
 
     public static OpenGrape fetch(String url) throws IOException, OpenGrapeResponseException {
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         int statusCode = connection.getResponseCode();
         if (statusCode < 200 || statusCode > 300) {
