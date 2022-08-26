@@ -10,8 +10,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
 
 public class OpenGrape {
     private final Map<OpenGrapeMetadata, String> source;
@@ -20,6 +21,10 @@ public class OpenGrape {
 
     public OpenGrape(String htmlString, OpenGrapeParser parser) {
         this.source = parser.parse(htmlString);
+    }
+
+    private OpenGrape() {
+        source = new HashMap<>();
     }
 
     public static OpenGrape fetch(String url) throws IOException, OpenGrapeResponseException {
@@ -45,6 +50,31 @@ public class OpenGrape {
             htmlString.append(line).append("\n");
         }
         return new OpenGrape(htmlString.toString(), new DefaultOpenGrapeParser());
+    }
+
+    public static OpenGrape fetch(String url, int timeoutSeconds) throws IOException, OpenGrapeResponseException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<OpenGrape> future = executor.submit(() -> OpenGrape.fetch(url));
+        try {
+            return future.get(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+        } catch (ExecutionException e) {
+            if (e.getCause() != null) {
+                if (e.getCause() instanceof IOException) {
+                    throw (IOException) e.getCause();
+                } else if (e.getCause() instanceof OpenGrapeResponseException) {
+                    throw (OpenGrapeResponseException) e.getCause();
+                }
+            }
+            e.printStackTrace();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            executor.shutdownNow();
+        }
+        return new OpenGrape();
     }
 
     public String getValue(OpenGrapeMetadata metadata) {
