@@ -1,5 +1,7 @@
 package social.orbitearth.opengrape;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import social.orbitearth.opengrape.parser.DefaultOpenGrapeParser;
 import social.orbitearth.opengrape.parser.OpenGrapeParser;
 
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 public class OpenGrape {
+    private final static Logger logger = LoggerFactory.getLogger(OpenGrape.class);
     private final Map<OpenGrapeMetadata, String> source;
 
     private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_5_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
@@ -40,6 +43,7 @@ public class OpenGrape {
         connection.setRequestProperty("User-Agent", userAgent);
         int statusCode = connection.getResponseCode();
         if (statusCode < 200 || statusCode > 300) {
+            logger.warn("Could not load {} for parsing. HTTP status code {}", url, statusCode);
             throw new OpenGrapeResponseException.UnexpectedStatusCode(statusCode);
         }
         InputStream inputStream = connection.getInputStream();
@@ -60,6 +64,7 @@ public class OpenGrape {
         } catch (TimeoutException e) {
             future.cancel(true);
         } catch (ExecutionException e) {
+            logger.warn("Unable to load {} for parsing.", url, e);
             if (e.getCause() != null) {
                 if (e.getCause() instanceof IOException) {
                     throw (IOException) e.getCause();
@@ -67,10 +72,9 @@ public class OpenGrape {
                     throw (OpenGrapeResponseException) e.getCause();
                 }
             }
-            e.printStackTrace();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("Unable to load {} for parsing.", url, e);
         } finally {
             executor.shutdownNow();
         }

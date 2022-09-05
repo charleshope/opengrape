@@ -6,7 +6,10 @@ like social media applications, to fetch previews of webpages, such as thumbnail
 This Orbit Earth OpenGrape is a friendly fork of the excellent [Kientux OpenGrape](https://github.com/kientux/opengrape), 
 which is a Java port of the Swift [OpenGraph](https://github.com/satoshi-takano/OpenGraph).
 
-### Installation
+# Installation
+Unlike Kientux OpenGrape, this version is not hosted in a public Maven repository, but must be built and
+installed locally using `mvn install`.
+
 ```
 <dependency>
     <groupId>social.orbitearth</groupId>
@@ -15,7 +18,7 @@ which is a Java port of the Swift [OpenGraph](https://github.com/satoshi-takano/
 </dependency>
 ```
 
-### Usage:
+# Usage
 
 ```java
 String url = "https://opengraphprotocol.org/";
@@ -30,3 +33,8 @@ try {
     e.printStackTrace();
 }
 ```
+
+
+# Versions
+* 1.0.0 Initial fork
+* 1.0.1 Added Slf4j logging
