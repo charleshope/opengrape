@@ -36,5 +36,7 @@ try {
 
 
 # Versions
-* 1.0.0 Initial fork
-* 1.0.1 Added Slf4j logging
+* **1.0.0** Initial fork
+* **1.0.1** Added Slf4j logging
+* **1.0.2** New user agent that works more broadly
+  * Java 17
