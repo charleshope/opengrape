@@ -19,8 +19,7 @@ public class OpenGrape
     private final static Logger logger = LoggerFactory.getLogger(OpenGrape.class);
     private final Map<OpenGrapeMetadata, String> source;
 
-    static final String DEFAULT_USER_AGENT =
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_5_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
+    static final String DEFAULT_USER_AGENT = "WhatsApp/2.2336.9 N";
 
     public OpenGrape(String htmlString, OpenGrapeParser parser)
     {
@@ -104,5 +103,15 @@ public class OpenGrape
     public String getValue(OpenGrapeMetadata metadata)
     {
         return source.get(metadata);
+    }
+
+    /**
+     * Loads the OG metadata of a url.
+     * @param args url to load
+     */
+    public static void main(String[] args) throws OpenGrapeResponseException, IOException
+    {
+        OpenGrape fetched = OpenGrape.fetch(args[0], "WhatsApp/2.2336.9 N");
+        System.out.println(fetched.source);
     }
 }

@@ -22,7 +22,7 @@ abstract public class HttpTest
     /**
      * Sent by the last request to the fake server.
      */
-    protected static Map<String, String> headers;
+    protected static Map<String, String> headers = new HashMap<>();
     private FakeServer fake_server;
 
     protected FakeServer givenHTTPServer(NanoHTTPD.Response.Status status, String content) throws IOException
