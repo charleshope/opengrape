@@ -14,24 +14,17 @@ installed locally using `mvn install`.
 <dependency>
     <groupId>social.orbitearth</groupId>
     <artifactId>opengrape</artifactId>
-    <version>[1.0.0,)</version>
+    <version>[2.0.0,)</version>
 </dependency>
 ```
 
 # Usage
 
 ```java
-String url = "https://opengraphprotocol.org/";
-
-try {
-    OpenGrape og = OpenGrape.fetch(url);
-    // or OpenGrape.fetch(url, "my custom user-agent")
-    // or OpenGrape.fetch(url, 3) with a 3 second timeout
-    String title = og.getValue(OpenGrapeMetadata.TITLE);
-    System.out.println(title);
-} catch (IOException | OpenGrapeResponseException e) {
-    e.printStackTrace();
-}
+OpenGrape og = new OpenGrape();
+Map<OpenGrapeMetadata, String> metadata = og.fetch("https://opengraphprotocol.org/");
+String title = metadata.get(OpenGrapeMetadata.TITLE);
+System.out.println(title);
 ```
 
 
@@ -40,3 +33,6 @@ try {
 * **1.0.1** Added Slf4j logging
 * **1.0.2** New user agent that works more broadly
   * Java 17
+* **2.0.0** Changed `OpenGrape` class from static to instance
+  * Handles Youtube urls
+  * Removed the removal of trailing `/` from urls.

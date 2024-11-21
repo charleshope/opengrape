@@ -1,22 +1,24 @@
 package social.orbitearth.opengrape;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("SameParameterValue")
 public class OpenGrapeTestAssertions
 {
-    protected static void thenTitleIs(String title, OpenGrape og)
+    protected static void thenTitleIs(String title, Map<OpenGrapeMetadata, String> og)
     {
-        assertEquals(title, og.getValue(OpenGrapeMetadata.TITLE));
+        assertEquals(title, og.get(OpenGrapeMetadata.TITLE));
     }
 
-    protected static void thenImageValueIs(String image, OpenGrape og)
+    protected static void thenImageValueIs(String image, Map<OpenGrapeMetadata, String> og)
     {
-        assertEquals(image, og.getValue(OpenGrapeMetadata.IMAGE));
+        assertEquals(image, og.get(OpenGrapeMetadata.IMAGE));
     }
 
-    protected static void thenDescriptionValueIs(String image, OpenGrape og)
+    protected static void thenDescriptionValueIs(String image, Map<OpenGrapeMetadata, String> og)
     {
-        assertEquals(image, og.getValue(OpenGrapeMetadata.DESCRIPTION));
+        assertEquals(image, og.get(OpenGrapeMetadata.DESCRIPTION));
     }
 }
