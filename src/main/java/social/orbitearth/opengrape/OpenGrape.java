@@ -1,26 +1,25 @@
 package social.orbitearth.opengrape;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.*;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import social.orbitearth.opengrape.parser.DefaultOpenGrapeParser;
-import social.orbitearth.opengrape.parser.OpenGrapeParser;
 
 public class OpenGrape
 {
     private final static Logger logger = LoggerFactory.getLogger(OpenGrape.class);
 
-    private final OpenGrapeParser parser;
     private final UserAgentFactory user_agent_factory;
 
     OpenGrape(UserAgentFactory user_agent_factory)
     {
-        parser = new DefaultOpenGrapeParser();
         this.user_agent_factory = user_agent_factory;
     }
 
@@ -29,37 +28,56 @@ public class OpenGrape
         this(new UserAgentFactory());
     }
 
-    /**
-     * @return Map of the Open Graph metadata, keyed by the {@link OpenGrapeMetadata} enums.
-     * @throws OpenGrapeResponseException when the host returned an HTTP status not 2xx.
-     */
-    public Map<OpenGrapeMetadata, String> fetch(URI uri) throws IOException, OpenGrapeResponseException
+    @SuppressWarnings("ConstantValue")
+    private Map<OpenGrapeMetadata, String> parse(Document document)
     {
-        HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
-        String userAgent = user_agent_factory.getUserAgent(uri);
-        connection.setRequestProperty("User-Agent", userAgent);
-        int statusCode = connection.getResponseCode();
-        if (statusCode < 200 || statusCode > 300)
+        Map<OpenGrapeMetadata, String> open_grape_metadata = new HashMap<>();
+        Elements meta_elements = document.select("meta");
+        logger.debug("Found {} meta elements.", meta_elements.size());
+        for (Element meta_element : meta_elements)
         {
-            logger.warn("Could not load {} for parsing. HTTP status code {}", uri, statusCode);
-            throw new OpenGrapeResponseException.UnexpectedStatusCode(statusCode);
-        }
-        InputStream inputStream = connection.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String line;
-        StringBuilder htmlString = new StringBuilder();
-        while ((line = reader.readLine()) != null)
-            htmlString.append(line).append("\n");
+            Attribute property = meta_element.attribute("property");
+            if (property == null)
+                continue;
+            String property_value = property.getValue();
+            if (!property_value.startsWith("og:"))
+                continue;
 
-        return parser.parse(htmlString.toString());
+            Attribute content = meta_element.attribute("content");
+            if (content == null)
+                continue;
+            String content_value = content.getValue();
+
+            logger.debug("Found a meta element with property=\"{}\", content={{}}", property_value, content_value);
+            property_value = property_value.substring(3); // Remove the "og:" prefix
+            OpenGrapeMetadata metadata = OpenGrapeMetadata.withValue(property_value);
+            if (metadata != null)
+                open_grape_metadata.put(metadata, content_value);
+            else
+                logger.warn("Invalid OG property {}", property_value);
+        }
+
+        return open_grape_metadata;
     }
 
     /**
      * @return Map of the Open Graph metadata, keyed by the {@link OpenGrapeMetadata} enums.
-     * @throws OpenGrapeResponseException when the host returned an HTTP status not 2xx.
+     */
+    public Map<OpenGrapeMetadata, String> fetch(URI uri) throws IOException
+    {
+        String user_agent = user_agent_factory.getUserAgent(uri);
+        Document document = Jsoup.connect(uri.toString())
+          .userAgent(user_agent)
+          .get();
+
+        return parse(document);
+    }
+
+    /**
+     * @return Map of the Open Graph metadata, keyed by the {@link OpenGrapeMetadata} enums.
      */
     public Map<OpenGrapeMetadata, String> fetch(String url)
-            throws IOException, OpenGrapeResponseException, URISyntaxException
+            throws IOException, URISyntaxException
     {
         return fetch(new URI(url));
     }
@@ -68,7 +86,7 @@ public class OpenGrape
      * Loads the OG metadata of a url.
      * @param args url to load
      */
-    public static void main(String[] args) throws OpenGrapeResponseException, IOException, URISyntaxException
+    public static void main(String[] args) throws Exception
     {
         System.out.println(new OpenGrape().fetch(new URI(args[0])));
     }

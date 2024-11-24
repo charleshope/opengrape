@@ -72,7 +72,7 @@ abstract public class HttpTest
 
             parameters = session.getParameters();
             headers = session.getHeaders();
-            return newFixedLengthResponse(status, "application/json", content);
+            return newFixedLengthResponse(status, "text/html", content);
         }
 
         public int getPort()
