@@ -14,7 +14,7 @@ installed locally using `mvn install`.
 <dependency>
     <groupId>social.orbitearth</groupId>
     <artifactId>opengrape</artifactId>
-    <version>[2.0.0,)</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 
@@ -36,3 +36,7 @@ System.out.println(title);
 * **2.0.0** Changed `OpenGrape` class from static to instance
   * Handles Youtube urls
   * Removed the removal of trailing `/` from urls.
+* **2.0.1** Succeeds against some Twitter pages it couldn't parse before, because parsing now uses 
+[JSoup](https://jsoup.org/).
+  * Uses maven assembly jar to bundle dependencies Slf4j, JSoup.
+  
